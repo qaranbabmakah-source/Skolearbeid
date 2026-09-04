@@ -1,0 +1,8 @@
+for tall in range(1, 6):
+    print(tall)
+for tall in range(1, 6):
+    print(tall * 2)
+for tall in range(10, 0, -1):
+    print(tall)
+for tall in range(10, 0, -1):
+    print(tall)

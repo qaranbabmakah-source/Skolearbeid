@@ -1,0 +1,30 @@
+def dobbel(tall):
+    return tall * 2
+
+
+svar = dobbel(5)
+
+print(svar)
+def legg_sammen(tall1, tall2):
+    return tall1 + tall2
+
+
+svar = legg_sammen(10, 5)
+
+print(svar)
+def kvadrat(tall):
+    return tall * tall
+
+
+svar = kvadrat(6)
+
+print(svar)
+
+import random
+
+def kast_terning():
+    return random.randint(1, 6)
+
+terning = kast_terning()
+
+print(terning)

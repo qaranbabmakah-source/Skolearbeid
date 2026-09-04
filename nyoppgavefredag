@@ -1,0 +1,31 @@
+import random
+
+def kast_terning():
+    return random.randint(1, 6)
+
+
+def spill(antall_kast):
+    antall_par = 0
+    antall_7 = 0
+
+    for i in range(antall_kast):
+        terning1 = kast_terning()
+        terning2 = kast_terning()
+
+        sum = terning1 + terning2
+
+        if terning1 == terning2:
+            antall_par = antall_par + 1
+
+        if sum == 7:
+            antall_7 = antall_7 + 1
+
+    return antall_par, antall_7
+
+
+antall_kast = int(input("Hvor mange kast? "))
+
+par, syv = spill(antall_kast)
+
+print("Antall par:", par)
+print("Antall ganger summen ble 7:", syv)

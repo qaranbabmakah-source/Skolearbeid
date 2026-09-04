@@ -1,0 +1,29 @@
+def si_hei():
+    print("Hei")
+
+si_hei()
+
+def si_hei(navn):
+    print("Hei", navn)
+
+si_hei("Omar")
+def vis_melding():
+    print("Dette er en melding")
+
+vis_melding()
+vis_melding()
+vis_melding()
+import random
+
+def tilfeldig_hilsen():
+    hilsener = ["Hei", "Hallo", "God dag"]
+    print(random.choice(hilsener))
+
+tilfeldig_hilsen()
+tilfeldig_hilsen()
+tilfeldig_hilsen()
+def si_hei_til(navn):
+    print("Hei", navn)
+
+si_hei_til("Lise")
+si_hei_til("Ahmed")

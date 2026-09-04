@@ -1,0 +1,53 @@
+def si_hei_til(navn):
+    print("Hei", navn)
+
+si_hei_til("Lise")
+si_hei_til("Ahmed")
+si_hei_til("Omar")
+def tegn_katt():
+    print("=^.^=")
+
+tegn_katt()
+def tegn_katter(antall):
+    for i in range(antall):
+        print("=^.^=")
+
+tegn_katter(3)
+def si_hei_til(navn):
+    print("Hei", navn)
+
+si_hei_til("Lise")
+si_hei_til("Ahmed")
+si_hei_til("Omar")
+
+
+def tegn_katt():
+    print("=^.^=")
+
+
+def tegn_katter(antall):
+    for i in range(antall):
+        print("=^.^=")
+
+
+tegn_katter(3)
+
+def skriv_tall(antall):
+    for tall in range(1, antall + 1):
+        print(tall)
+
+skriv_tall(5)
+def skriv_tall(antall):
+    for tall in range(1, antall + 1):
+        print(tall)
+
+antall = int(input("Hvor mange tall? "))
+
+skriv_tall(antall)
+
+def navneskilt(navn):
+    print("********")
+    print("*", navn, "*")
+    print("********")
+
+navneskilt("Omar")

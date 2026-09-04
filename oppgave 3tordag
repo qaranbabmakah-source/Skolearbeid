@@ -1,0 +1,24 @@
+def navneskilt(navn):
+    print("********")
+    print("*", navn, "*")
+    print("********")
+
+navneskilt("Omar")
+def navneskilt(navn):
+    bredde = len(navn) + 4
+    print("*" * bredde)
+    print("* " + navn + " *")
+    print("*" * bredde)
+
+
+navneskilt("Omar")
+navneskilt("Ahmed")
+
+def gangetabell(tall):
+    for i in range(1, 11):
+        print(tall, "x", i, "=", tall * i)
+
+
+gangetabell(5)
+gangetabell(7)
+gangetabell(10)
