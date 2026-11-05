@@ -1,3 +1,7 @@
+UKEPLAN-AD DS OG LDAP
+
+
+
 Mandag – bygg organisasjonen i Active Directory
 
 Stage 1
@@ -161,7 +165,465 @@ GG-HR – en global gruppe for ansatte i HR.
 DL-Felles-HR-RW – en domenelokal gruppe som gir tilgang til HR-mappen.
 Jeg vil legge GG-HR inn i DL-Felles-HR-RW.
 
-Dette gjør det enklere å administrere brukere og rettigheter. Bare ansatte som trenger tilgang til HR-mappen, skal få tilgang
+Dette gjør det enklere å administrere brukere og rettigheter. Bare ansatte som trenger tilgang til HR-mappen, skal få tilgang.
+
+
+Tirsdag – klient, domenepålogging og tilgang
+Steg 1 – DNS før domenemedlemskap
+
+
+Steg 1 – DNS før domenemedlemskap
+
+Utført arbeid:
+
+Kontrollerte nettverksinnstillingene på CLIENT01 med ipconfig /all.
+Bekreftet at CLIENT01 har IP-adressen 192.168.1.108 og DNS-server 192.168.1.10 (DC01).
+Kontrollerte DNS-tjenesten på DC01 med Get-Service DNS. Status var Running.
+Testet DNS på DC01 med nslookup google.com 192.168.1.10. Testen fungerte.
+Feil og feilsøking:
+
+CLIENT01 fikk feilmeldingen DNS request timed out ved DNS-oppslag mot DC01.
+Ping fra DC01 til CLIENT01 fungerte ikke.
+Opprettet en brannmurregel for ICMPv4 på CLIENT01, men problemet vedvarte.
+Resultat:
+DNS er riktig angitt på CLIENT01, men DNS-kommunikasjonen med DC01 fungerer fortsatt ikke. Oppslagene nslookup ad.lab.test og nslookup dc01.ad.lab.test er ikke dokumentert som testet.
+
+Steg 2 – meld CLIENT01 inn i domenet
+
+Mål
+
+Målet med denne oppgaven er å endre klientens datamaskinnavn til CLIENT01, melde klienten inn i domenet ad.lab.test, og kontrollere domenepålogging.
+
+Arbeid som er utført
+
+Jeg åpnet Systemegenskaper på klientmaskinen.
+Jeg gikk til fanen Datamaskinnavn og klikket på Endre.
+Jeg endret datamaskinnavnet fra DESKTOP-CS3A0OK til CLIENT01.
+Jeg valgte Domene og skrev inn ad.lab.test.
+Jeg klikket på OK for å forsøke å melde klienten inn i domenet.
+Problem som oppstod
+
+Windows viste følgende feilmelding:
+
+«Kan ikke kontakte Active Directory-domenekontrolleren (AD DC) for domenet ad.lab.test.»
+
+Dette betyr at klienten ikke klarte å kontakte domenekontrolleren.
+
+Feilsøking
+
+Jeg åpnet PowerShell på klientmaskinen og kjørte kommandoen:
+
+nslookup ad.lab.test 192.168.1.10
+
+Resultatet viste:
+
+DNS request timed out
+Server: Unknown
+Address: 192.168.1.10
+Request timed-out
+Testen viste at klienten ikke fikk svar fra DNS-serveren på 192.168.1.10.
+
+Tidligere nettverkstester viste også at klienten kunne kontakte 192.168.1.104, men ikke 192.168.1.10.
+
+Status
+
+Steg 2 er påbegynt, men ikke fullført.
+
+Datamaskinnavnet CLIENT01 er skrevet inn, men endringen er ikke bekreftet etter omstart.
+Forsøket på å melde klienten inn i ad.lab.test mislyktes.
+DNS- og nettverkstilkoblingen til domenekontrolleren må undersøkes.
+Domenepålogging og kommandoene whoami og whoami /groups er ikke gjennomført.
+Sammenligning med lokal pålogging (.\lokalbruker) gjenstår.
+
+Steg 3 – flytt datamaskinobjektet
+
+
+Hva jeg gjorde:
+
+Åpnet Active Directory Users and Computers på DC01.
+Opprettet datamaskinobjektet CLIENT01 i Bedrift\Datamaskiner.
+Endret navnet på den virtuelle maskinen til client01.
+Forsøkte å koble CLIENT01 til domenet firma.local.
+Kontrollerte DNS, IP-adresse og nettverkskort i Hyper-V.
+Problemer:
+
+CLIENT01 klarte ikke å kontakte domenekontrolleren DC01.
+nslookup firma.local ga «DNS request timed out».
+ping 192.168.1.10 ga «Destination host unreachable».
+Domenetilkoblingen mislyktes på grunn av nettverksproblemer.
+Hvorfor bruke en egen OU?
+
+En egen OU gjør det enklere å organisere datamaskiner, administrere sikkerhet og bruke Group Policy (GPO).
+
+Steg 4 – gruppebasert tilgang
+
+Steg 4 – Gruppebasert tilgang
+
+Mål: Opprette delte mapper på DC01 og styre tilgangen gjennom sikkerhetsgrupper i Active Directory.
+
+Arbeid utført
+
+Opprettet mappene C:\Felles\Administrasjon og C:\Felles\Support på DC01.
+Kontrollerte sikkerhetsgruppene i Active Directory.
+Arbeidet med NTFS-tillatelser under Egenskaper → Sikkerhet.
+Brukte ressursgrupper for å tildele tilgang i stedet for enkeltbrukere.
+Problemer underveis
+
+Vi fikk feilmeldingen «Finner ikke navn» da vi forsøkte å legge til gruppen DL-Felles-Support-RW. Vi kontrollerte gruppenavnene i Active Directory og brukte avansert søk for å finne riktige grupper.
+
+Testing og resultat
+
+Forventet tilgang fra CLIENT01:
+
+
+
+Bruker
+
+Mappe
+
+Forventet resultat
+
+Support
+
+Support
+
+Tilgang
+
+Support
+
+Administrasjon
+
+Ingen tilgang
+
+Administrasjon
+
+Administrasjon
+
+Tilgang
+
+Konklusjon: Mappene ble opprettet, og vi arbeidet med gruppebaserte tillatelser. Testresultatene fra CLIENT01 er ikke dokumentert med skjermbilder.
+
+
+
+Tirsdagens oppgave – Active Directory og filtilgang
+
+1. Mål
+
+Målet mitt var å koble CLIENT01 til domenet firma.local, teste domenebrukere og kontrollere gruppebasert tilgang til mapper.
+
+2. Domenetilknytning – CLIENT01
+
+Jeg endret datamaskinnavnet til CLIENT01 og forsøkte å melde maskinen inn i domenet firma.local.
+
+Jeg fikk feilmeldingen om at domenekontrolleren ikke kunne kontaktes. Jeg undersøkte problemet med ipconfig, ping og nslookup.
+
+CLIENT01 hadde IP-adressen 192.168.1.108 og DNS-serveren 192.168.1.10.
+
+Jeg klarte ikke å fullføre domenetilknytningen på grunn av nettverks- og DNS-problemer.
+
+3. Gruppebasert tilgang
+
+Jeg opprettet to mapper på DC01:
+
+C:\Felles\Support
+C:\Felles\Administrasjon
+Jeg kontrollerte sikkerhetsgruppene i Active Directory og arbeidet med å gi gruppene tilgang til riktige mapper.
+
+Jeg fikk problemer med å finne gruppen DL-Felles-Support-RW. Jeg brukte avansert søk for å finne riktig gruppenavn.
+
+4. Testing av domenebrukere
+
+Jeg skulle teste minst to forskjellige domenebrukere og bruke kommandoen whoami /groups for å kontrollere gruppemedlemskap.
+
+Jeg fikk ikke fullført testene fra CLIENT01 fordi domenetilknytningen ikke fungerte.
+
+5. Rettighetsmatrise
+
+
+
+Brukergruppe
+
+Support
+
+Administrasjon
+
+GG-Support
+
+Tillatt
+
+Ingen tilgang
+
+GG-Administrasjon
+
+Ingen tilgang
+
+Tillatt
+
+Dette er tilgangene jeg forventet. Jeg fikk ikke bekreftet alle resultatene gjennom testing.
+
+6. NTFS og delingsrettigheter
+
+Jeg undersøkte forskjellen mellom NTFS-rettigheter og delingsrettigheter.
+
+NTFS-rettigheter styrer tilgangen til filer og mapper, mens delingsrettigheter styrer tilgang via nettverket.
+
+Jeg lærte at den mest begrensende effektive tillatelsen gjelder når begge brukes.
+
+7. FILE01 – Videre utforskning
+
+Jeg skulle opprette en Windows Server-VM kalt FILE01, melde den inn i domenet og flytte fildelingen dit.
+
+Jeg har ikke dokumentert denne delen som fullført.
+
+8. Konklusjon
+
+Jeg fikk opprettet mapper og arbeidet med gruppebasert tilgang i Active Directory.
+
+Jeg møtte problemer med DNS, domenetilknytning og søk etter sikkerhetsgrupper. Jeg forsøkte å løse problemene ved å kontrollere nettverksinnstillinger og gruppenavn.
+
+Jeg lærte mer om Active Directory, gruppebaserte rettigheter og feilsøking i Windows Server.
+
+Onsdag – LDAP og katalogsøk
+
+Steg 1 – LDAP og Distinguished Name
+
+Mål
+
+Målet mitt var å forstå hvordan objekter i Active Directory er organisert, og hvordan jeg kan finne plasseringen deres ved hjelp av Distinguished Name (DN).
+
+Hva jeg gjorde
+
+Jeg åpnet Active Directory Users and Computers på DC01.
+
+Jeg gikk til:
+
+firma.local → Bedrift → Brukere → Support
+
+Der fant jeg brukeren Sara Ahmed.
+
+Jeg høyreklikket på brukeren og valgte Egenskaper. Deretter aktiverte jeg avanserte funksjoner og åpnet Redigeringsprogram for attributter.
+
+Jeg fant attributtet distinguishedName og undersøkte verdien.
+
+Resultat
+
+Jeg fant følgende Distinguished Name:
+
+CN=Sara Ahmed,OU=Support,OU=Brukere,OU=Bedrift,DC=firma,DC=local
+
+Dette betyr:
+
+CN=Sara Ahmed: Navnet på brukerobjektet.
+OU=Support: Brukeren ligger i organisasjonsenheten Support.
+OU=Brukere: Support ligger under Brukere.
+OU=Bedrift: Brukere ligger under Bedrift.
+DC=firma,DC=local: Domenet heter firma.local.
+Hva jeg lærte
+
+Jeg lærte at LDAP er en protokoll som brukes til å søke etter og lese informasjon i katalogtjenester som Active Directory.
+
+Jeg lærte også at Distinguished Name (DN) viser den nøyaktige plasseringen til et objekt i katalogstrukturen.
+
+Konklusjon
+
+Jeg klarte å finne Distinguished Name for brukeren Sara Ahmed og forstå hvordan CN, OU og DC beskriver plasseringen til brukeren i Active Directory.
+
+
+Steg 2 – hent DN med PowerShell
+
+Jeg brukte PowerShell på DC01 for å finne Distinguished Name (DN) til en bruker og en datamaskin i Active Directory.
+
+Først undersøkte jeg brukeren Sara Ahmed med kommandoen:
+
+Get-ADUser -Filter "Name -eq 'Sara Ahmed'" -Properties DistinguishedName
+
+Jeg fikk følgende resultat:
+
+CN=Sara Ahmed,OU=Support,OU=Brukere,OU=Bedrift,DC=firma,DC=local
+
+Deretter brukte jeg kommandoen:
+
+Get-ADComputer CLIENT01 -Properties DistinguishedName
+
+Resultatet var:
+
+CN=Client01,OU=Datamaskiner,OU=Bedrift,DC=firma,DC=local
+
+Jeg sammenlignet resultatene med plasseringen i Active Directory Users and Computers.
+
+Jeg fant ut at Sara Ahmed ligger under Bedrift → Brukere → Support, mens Client01 ligger under Bedrift → Datamaskiner.
+
+Konklusjon: Jeg lærte hvordan jeg kan bruke PowerShell til å finne Distinguished Name og kontrollere hvor objekter ligger i Active Directory.
+
+
+
+Steg 3 – søk i en bestemt del av katalogen
+
+Mål
+
+Målet mitt var å lære hvordan jeg kan søke etter brukere i en bestemt del av Active Directory ved hjelp av PowerShell og LDAP.
+
+Hva jeg gjorde
+
+Jeg åpnet PowerShell på DC01 og forsøkte å søke etter brukerne i Support-OU-en.
+
+Jeg brukte kommandoen:
+
+Get-ADUser -Filter * -SearchBase "OU=Support,OU=Brukere,OU=Bedrift,DC=firma,DC=local"
+
+Jeg brukte domenet firma.local fordi dette er domenet mitt.
+
+Problemer jeg møtte
+
+Da jeg kjørte kommandoen, fikk jeg feilmeldinger.
+
+Først fikk jeg en feil fordi jeg hadde skrevet SearchBase uten bindestrek foran.
+
+Jeg rettet kommandoen og prøvde igjen, men fikk feilmeldingen «Finner ikke mappeobjektet».
+
+Jeg forsøkte også å bruke Get-ADOrganizationalUnit for å finne riktig Distinguished Name, men kommandoen ble skrevet feil og ble derfor ikke gjenkjent av PowerShell.
+
+Jeg fikk ikke fullført søket etter alle brukerne i Support-OU-en.
+
+LDAP-filter
+
+Oppgaven ba meg også prøve et LDAP-filter med sAMAccountName.
+
+Et eksempel tilpasset mitt domene er:
+
+Get-ADUser -LDAPFilter "(sAMAccountName=brukernavn)"
+
+Jeg har ikke testet dette filteret ennå.
+
+Hva jeg lærte
+
+Jeg lærte at -SearchBase brukes til å begrense et søk til en bestemt del av Active Directory.
+
+Jeg lærte også at -LDAPFilter kan brukes til å søke etter objekter basert på attributter, for eksempel sAMAccountName.
+
+Konklusjon
+
+Jeg forsøkte å søke etter brukere i Support-OU-en med PowerShell. Selv om søket ikke ble fullført, fikk jeg erfaring med feilsøking og lærte at Active Directory kan søkes på forskjellige måter.
+
+
+Steg 4 – koble LDAP tilbake til nettverksuka
+
+Mål
+
+Målet mitt var å undersøke forbindelsen mellom CLIENT01 og domenekontrolleren DC01 ved hjelp av TCP-port 389, som normalt brukes til LDAP.
+
+Hva jeg gjorde
+
+Jeg åpnet Windows PowerShell på CLIENT01 og testet forbindelsen til DC01 med kommandoen:
+
+Test-NetConnection dc01.firma.local -Port 389
+
+Jeg fikk feilmeldingen:
+
+Name resolution of DC01.firma.local failed
+
+Dette viste at CLIENT01 ikke klarte å finne IP-adressen til DC01 gjennom DNS.
+
+Testing med IP-adresser
+
+Jeg forsøkte deretter å koble til DC01 direkte med IP-adressen:
+
+Test-NetConnection 192.168.1.10 -Port 389
+
+Resultatet var:
+
+TcpTestSucceeded : False
+
+Jeg undersøkte nettverksinnstillingene på DC01 med kommandoen ipconfig og fant to IP-adresser:
+
+Ethernet: 192.168.1.10
+vEthernet (Hyper-V): 192.168.1.104
+Deretter testet jeg den andre IP-adressen fra CLIENT01:
+
+Test-NetConnection 192.168.1.104 -Port 389
+
+Resultatet var:
+
+TcpTestSucceeded : True
+
+Dette viste at CLIENT01 kunne opprette en TCP-forbindelse til port 389 på DC01 via IP-adressen 192.168.1.104.
+
+Sammenhengen mellom DNS, TCP og LDAP
+
+Jeg lærte at disse nettverkstjenestene samarbeider:
+
+DNS oversetter domenenavnet til en IP-adresse.
+TCP oppretter en forbindelse til riktig IP-adresse og port.
+LDAP brukes til å søke etter og hente informasjon fra Active Directory.
+Port 389 brukes normalt til LDAP.
+
+Konklusjon
+
+Jeg klarte å teste forbindelsen mellom CLIENT01 og DC01.
+
+Den første testen med domenenavnet mislyktes på grunn av DNS-navneoppslag. Testen mot 192.168.1.10 mislyktes også.
+
+Da jeg brukte IP-adressen 192.168.1.104, fikk jeg TcpTestSucceeded: True.
+
+Jeg lærte hvordan DNS, IP-adresser, TCP-porter og LDAP henger sammen. Testen bekreftet at TCP-port 389 var tilgjengelig via den andre IP-adressen, men jeg testet ikke et faktisk LDAP-søk fra CLIENT01.
+
+
+
+Onsdagens oppgave – LDAP og katalogsøk
+
+Grunnoppgave
+
+Jeg fant brukeren Sara Ahmed og datamaskinen CLIENT01 både i Active Directory Users and Computers og med PowerShell.
+
+Jeg brukte kommandoene:
+
+Get-ADUser -Filter "Name -eq 'Sara Ahmed'" -Properties DistinguishedName
+
+Get-ADComputer CLIENT01 -Properties DistinguishedName
+
+Jeg fant DN til Sara Ahmed:
+
+CN=Sara Ahmed,OU=Support,OU=Brukere,OU=Bedrift,DC=firma,DC=local
+
+CN er objektnavnet, OU viser plasseringen, og DC viser domenet.
+
+Jeg forsøkte å bruke -SearchBase for å søke i Support-OU, men fikk feilmeldinger. Jeg lærte også hvordan LDAP-filter brukes til katalogsøk.
+
+Jeg testet LDAP-port 389 fra CLIENT01:
+
+dc01.firma.local: DNS-oppslag mislyktes.
+192.168.1.10: TCP-test mislyktes.
+192.168.1.104: TCP-test lyktes.
+Videre utforskning
+
+Jeg undersøkte hvordan LDAP-filter kan søke etter brukere basert på attributter som department.
+
+Jeg lærte at ldp.exe er et grafisk verktøy for å undersøke LDAP-katalogen.
+
+Jeg undersøkte også LDAPS. Port 636 brukes normalt til LDAP over TLS, som beskytter kommunikasjonen med kryptering.
+
+Konklusjon
+
+Jeg lærte å finne objekter i Active Directory, forstå Distinguished Name og undersøke LDAP og nettverksforbindelser.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
