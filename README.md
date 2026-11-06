@@ -607,12 +607,210 @@ Konklusjon
 Jeg lærte å finne objekter i Active Directory, forstå Distinguished Name og undersøke LDAP og nettverksforbindelser.
 
 
+Torsdag - Group Policy og AD-feilsøkingTorsdag - Group Policy og AD-feilsøking
+
+Steg 1 - forstå hva en GPO faktisk gjør
+
+1. Mål
+
+Målet mitt var å koble CLIENT01 til domenet firma.local, teste flere domenebrukere, kontrollere gruppemedlemskap og arbeide med gruppebasert tilgang og Group Policy.
+
+2. Oppsett og struktur
+
+Jeg brukte DC01 som domenekontroller og CLIENT01 som Windows-klient i Hyper-V.
+
+Jeg arbeidet med OU-strukturen Bedrift, Brukere, Support, Administrasjon og Grupper i Active Directory. Jeg brukte mappene C:\felles\Support og C:\felles\Administrasjon og sikkerhetsgrupper for tilgangsstyring.
+
+3. Test av domenebrukere
+
+Jeg meldte CLIENT01 inn i domenet firma.local og testet pålogging med Sara Ahmed, Mohamed Ali og Ali Hassan. Jeg fikk opplyst og kontrollert at testene var gjennomført.
+
+4. Kontroll med kommandolinje
+
+Jeg kjørte whoami på CLIENT01. Da jeg var logget inn som Sara Ahmed, fikk jeg resultatet firma\sara.ahmed.
+
+Jeg kjørte også whoami /groups og fant blant annet FIRMA\GG-Support og FIRMA\DL-Felles-Support-RW. Slik kontrollerte jeg hvilke grupper brukeren tilhørte.
+
+5. Group Policy (GPO)
+
+Jeg opprettet GPO-Support-Brukerinnstilling og koblet den til Support-OU-en. Under User Configuration > Policies > Administrative Templates > Desktop aktiverte jeg innstillingen som fjerner Papirkurv-ikonet fra skrivebordet.
+
+Jeg kjørte gpupdate /force på CLIENT01 og fikk melding om at både bruker- og datamaskinpolicy ble oppdatert.
+
+6. Mapper og tilgangsstyring
+
+Jeg arbeidet med gruppebaserte rettigheter for Support- og Administrasjon-mappene. Jeg bekreftet at Sara Ahmed kunne åpne Support-mappen fra CLIENT01.
+
+Jeg testet brukerkontoene og mappetilgangene i laben. Jeg lærte at både delingsrettigheter og NTFS-rettigheter påvirker den effektive tilgangen.
 
 
 
+Steg 2 - lag en trygg brukerpolicy
+Mål
+
+Målet mitt var å opprette en enkel og trygg brukerpolicy i Group Policy Management, knytte den til riktig organisasjonsenhet (OU) og teste at policyen ble brukt på en domenebruker på CLIENT01.
+
+Gjennomføring
+
+• Jeg åpnet Group Policy Management på domenekontrolleren DC01 i domenet firma.local.
+• Jeg opprettet GPO-en GPO-Support-Brukerinnstilling og koblet den til Support-OU-en under Bedrift > Brukere > Support.
+• Jeg valgte en enkel brukerinnstilling i Group Policy Editor. Jeg testet en innstilling knyttet til skrivebordet, blant annet å fjerne papirkurvikonet fra skrivebordet.
+• Jeg logget på CLIENT01 med domenebrukeren sara.ahmed, som er medlem av GG-Support.
+• Jeg kjørte kommandoen gpupdate /force for å oppdatere gruppepolicyene og deretter gpresult /r for å kontrollere hvilke GPO-er som var brukt.
+Resultat og kontroll
+
+Da jeg kjørte gpresult /r på CLIENT01, så jeg både GPO-Support-Brukerinnstilling og GPO-Support-Test under «Applied Group Policy Objects». Dette bekreftet at GPO-ene ble brukt for den innloggede brukeren.
+
+Jeg kontrollerte også at endringen fra brukerpolicyen var synlig på CLIENT01. Testen viste dermed både at policyen ble brukt, og at den hadde den forventede virkningen.
+
+Steg 3 - oppdater og bevis at policyen gjelder
+
+Mål
+
+Jeg skulle oppdatere gruppepolicyene på CLIENT01 og dokumentere at riktig GPO faktisk ble brukt på en bruker i Support-OU-en.
+
+Gjennomføring
+
+• Jeg logget på CLIENT01 med domenebrukeren firma\sara.ahmed.
+• Jeg åpnet Ledetekst (CMD) og kjørte kommandoen gpupdate /force for å oppdatere gruppepolicyene.
+• Deretter kjørte jeg gpresult /r for å se hvilke gruppepolicyobjekter som ble brukt på brukerkontoen.
+• Jeg kontrollerte delen «Applied Group Policy Objects» og tok et skjermbilde som dokumentasjon.
+Resultat
+
+I resultatet fra gpresult /r så jeg at både GPO-Support-Brukerinnstilling og GPO-Support-Test stod under «Applied Group Policy Objects». Jeg så også at brukeren var medlem av GG-Support og DL-Felles-Support-RW. Dette viser at de oppførte GPO-ene ble brukt for brukeren på CLIENT01.
+
+Konklusjon
+
+Jeg bekreftet med gpresult /r at GPO-Support-Brukerinnstilling ble brukt på Support-brukeren sara.ahmed. Jeg dokumenterte resultatet med et skjermbilde, slik at jeg kan vise at policyen er brukt og ikke bare konfigurert.
+
+Dokumentasjon – gpresult /r
 
 
 
+Figur 1: Jeg kontrollerte anvendte GPO-er med gpresult /r på CLIENT01.
+
+
+Steg 4 - AD-detektiv
+
+Mål
+
+Jeg undersøkte en mulig feil i domenemiljøet firma.local. Jeg brukte flere kommandoer for å finne ut hvorfor CLIENT01 ikke fikk forventede DNS-svar og hvorfor en av IP-adressene til DC01 ikke kunne nås.
+
+Symptom → hypotese → test → funn → løsning
+
+Symptom
+
+På CLIENT01 fikk jeg ikke forventet svar ved oppslag av LDAP-tjenesteposter. Jeg kunne heller ikke nå 192.168.1.10 med ping.
+
+Hypotese
+
+Jeg mistenkte feil eller uheldig DNS-konfigurasjon og undersøkte også om DC01 hadde flere nettverkskort og IP-adresser.
+
+Test
+
+Jeg brukte ipconfig /all, nslookup firma.local, nslookup med SRV-oppslag, ping og dcdiag /test:dns. Jeg kontrollerte også DNS Manager og IPv4-innstillingene på DC01.
+
+Funn
+
+CLIENT01 hadde IP-adressen 192.168.1.108 og brukte DNS-server 192.168.1.104. Ping til 192.168.1.104 fungerte, mens ping til 192.168.1.10 ga «Destination host unreachable». På DC01 fant jeg 192.168.1.10 på Ethernet og 192.168.1.104 på vEthernet. I DNS Manager fantes _ldap- og _kerberos-postene under firma.local/_tcp. dcdiag rapporterte likevel at DNS-testen feilet.
+
+Tiltak og ny test
+
+Jeg fjernet 192.168.1.1 som alternativ DNS-server på nettverkskortet med IP 192.168.1.10, slik at foretrukket DNS-server fortsatt var 192.168.1.10. Etterpå kjørte jeg dcdiag /test:dns på nytt. Testen viste fortsatt «failed».
+
+Konklusjon
+
+Jeg dokumenterte feilsøkingen og fant en mulig DNS-konfigurasjonsfeil, men jeg fikk ikke bekreftet at hele problemet var løst. Den tydeligste testen som avdekket DNS-problemet var dcdiag /test:dns, mens ping og nslookup hjalp meg med å avgrense feilen.
+
+Kommandoer jeg brukte
+
+• ipconfig /all
+• nslookup firma.local
+• nslookup -type=SRV _ldap._tcp.firma.local 192.168.1.104
+• ping 192.168.1.10
+• ping 192.168.1.104
+• dcdiag /test:dns
+
+
+Torsdagens grunnoppgave
+
+Active Directory, GPO og feilsøking | Dokumentasjon i jeg-form
+
+1. Mål og labmiljø
+
+Jeg jobbet i domenet firma.local med domenekontrolleren DC01 og klientmaskinen CLIENT01. Målet mitt var å konfigurere og kontrollere en brukerpolicy, feilsøke en feil og forklare hvordan Active Directory-tjenestene henger sammen.
+
+2. GPO knyttet til riktig OU
+
+Jeg opprettet GPO-en «GPO-Support-Brukerinnstilling» i Group Policy Management og koblet den til Support-OU-en under Bedrift → Brukere → Support. Jeg valgte en enkel brukerinnstilling som kunne kontrolleres på CLIENT01, knyttet til visningen av papirkurvikonet på skrivebordet. Jeg testet policyen med domenebrukeren firma\sara.ahmed.
+
+3. Oppdatering og bevis med gpresult
+
+På CLIENT01 logget jeg på som sara.ahmed og kjørte disse kommandoene:
+
+• gpupdate /force
+• gpresult /r
+gpupdate /force meldte at oppdateringen av bruker- og datamaskinpolicy var fullført. I gpresult /r så jeg «GPO-Support-Brukerinnstilling» og «GPO-Support-Test» under anvendte gruppepolicyobjekter for brukeren. Dette var den viktigste dokumentasjonen på at policyen faktisk ble mottatt. Jeg kontrollerte også den synlige brukerinnstillingen på skrivebordet.
+
+Dokumentasjonsvedlegg: Sett inn skjermbildet av gpresult /r her dersom det skal leveres som bevis.
+
+4. Selvstendig feilsøking – AD-detektiv
+
+Trinn
+
+Min dokumentasjon
+
+Symptom
+
+CLIENT01 fikk ikke kontakt med IP-adressen 192.168.1.10, og DNS-oppslag etter enkelte AD-tjenesteposter mislyktes.
+
+Hypotese
+
+Jeg mistenkte en feil i DNS-konfigurasjonen eller nettverksoppsettet på DC01.
+
+Test
+
+Jeg brukte ipconfig /all, nslookup, ping og dcdiag /test:dns. Jeg undersøkte også DNS Manager og IPv4-innstillingene.
+
+Funn
+
+CLIENT01 brukte DNS-server 192.168.1.104. Ping til 192.168.1.104 fungerte, mens ping til 192.168.1.10 ga «Destination host unreachable». DC01 hadde både 192.168.1.10 og 192.168.1.104 på ulike adaptere. DNS Manager viste _ldap- og _kerberos-poster i firma.local, men dcdiag rapporterte DNS-feil.
+
+Tiltak
+
+Jeg fjernet 192.168.1.1 som alternativ DNS-server fra IPv4-konfigurasjonen på adapteren med 192.168.1.10, slik at 192.168.1.10 sto som foretrukket DNS-server.
+
+Kontroll og status
+
+Jeg kjørte dcdiag /test:dns på nytt. Testen viste fortsatt «failed». Derfor kan jeg ikke dokumentere at feilen ble fullstendig løst. Videre feilsøking krever gjennomgang av den detaljerte dcdiag-rapporten og nettverksadapterne.
+
+Testen som tydeligst avdekket DNS-problemet, var dcdiag /test:dns. Ping-testene avdekket i tillegg forskjellen i nettverkstilgang mellom de to IP-adressene.
+
+5. Forskjellen mellom OU, gruppe og GPO
+
+OU: Jeg bruker en organisasjonsenhet (OU) til å organisere AD-objekter og bestemme hvor en GPO skal kobles, for eksempel Support-OU.
+
+Gruppe: Jeg bruker sikkerhetsgrupper til å samle brukere og tildele tilgang til ressurser. Sara var medlem av GG-Support og DL-Felles-Support-RW.
+
+GPO: Jeg bruker gruppepolicyobjekter (GPO) til å styre bruker- eller datamaskininnstillinger, for eksempel en skrivebordsinnstilling på CLIENT01.
+
+6. Hvordan tjenestene henger sammen
+
+DNS hjelper CLIENT01 å finne domenekontrolleren og AD-tjenestene. Domenekontrolleren DC01 kjører AD DS, som lagrer objekter som brukere, grupper og OU-er. LDAP brukes til å søke etter og lese informasjon om disse objektene. Sikkerhetsgrupper styrer hvilke ressurser en bruker kan få tilgang til, sammen med delings- og NTFS-rettigheter. GPO-er kobles til nettsteder, domener eller OU-er og brukes til å konfigurere innstillinger. Jeg kan kontrollere hvilke policyer som gjelder med gpresult /r.
+
+7. Kjeden forklart med mitt eget labmiljø
+
+DNS → domenekontroller → AD-objekt → gruppe → ressurs → LDAP-søk → GPO → test
+
+På CLIENT01 bruker jeg DNS for å finne domenet firma.local og domenekontrolleren DC01. På DC01 ligger AD-objektet sara.ahmed. Brukeren er medlem av GG-Support og DL-Felles-Support-RW, som brukes ved tilgangskontroll til Support-ressursen. Jeg kan undersøke brukerens og gruppenes opplysninger gjennom LDAP-baserte AD-oppslag, for eksempel med Get-ADUser og Get-ADGroupMember. Support-OU-en har GPO-en GPO-Support-Brukerinnstilling koblet til seg. Til slutt kjører jeg gpupdate /force og gpresult /r på CLIENT01 for å dokumentere at policyen er anvendt. DNS-feilsøkingen viste samtidig hvorfor fungerende navneoppløsning er viktig for domenet.
+
+8. Videre utforskning (valgfrie oppgaver)
+
+Læreren oppga flere valgfrie utvidelser: Security Filtering, HTML-rapport med gpresult /h, Salg-OU med brukere og LDAP-søk, CSV-automatisering, FILE01 og delegering. Disse er ikke dokumentert som utført i denne rapporten.
+
+9. Oppsummering
+
+Jeg har opprettet og testet en enkel GPO, dokumentert den med gpresult /r og gjennomført en systematisk feilsøkingsprosess. Jeg har også forklart forskjellen mellom OU, gruppe og GPO og hvordan DNS, AD DS, LDAP, grupper, ressurser og policyer henger sammen. DNS-feilen var fortsatt ikke fullstendig løst ved siste kontroll, og dette er oppgitt tydelig i rapporten.
 
 
 
