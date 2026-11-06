@@ -1,3 +1,65 @@
+Jobbklar – Hva jeg har lært om AD DS og LDAP
+
+Denne uken har jeg jobbet praktisk med Active Directory Domain Services (AD DS), LDAP, DNS og Group Policy i Windows Server.
+
+Jeg har lært hvordan jeg kan administrere brukere, grupper og OU-er i et Windows-domene.
+
+Dette har jeg gjort i laben
+
+Jeg har jobbet med domenet firma.local og domenekontrolleren DC01.
+Jeg har testet domenepålogging på CLIENT01 med brukeren sara.ahmed.
+Jeg har kontrollert gruppemedlemskap med kommandoen whoami /groups.
+Jeg har testet tilgang til den delte Support-mappen gjennom sikkerhetsgrupper.
+Jeg har opprettet og koblet en GPO til Support-OU-en.
+Jeg har brukt gpupdate /force og gpresult /r for å kontrollere at GPO-en ble brukt.
+Jeg har feilsøkt DNS og nettverk med ipconfig /all, nslookup og ping.
+Jeg har brukt dcdiag /test:dns for å undersøke DNS-feil på domenekontrolleren.
+Hva jeg har lært
+
+Jeg har lært forskjellen mellom OU, grupper og GPO.
+
+Jeg forstår bedre hvordan DNS hjelper klienter med å finne domenekontrolleren, hvordan AD DS administrerer brukere og grupper, og hvordan GPO brukes til sentral styring.
+
+Jeg har også lært at LDAP brukes til å søke etter informasjon i Active Directory.
+
+Feilsøking
+
+Jeg har lært å feilsøke systematisk. Jeg kontrollerer først nettverk og IP-adresse, deretter DNS, kontakt med domenekontrolleren, gruppemedlemskap og GPO.
+
+Under arbeidet oppdaget jeg problemer med DNS og kommunikasjonen mellom CLIENT01 og DC01. Jeg brukte kommandoer for å undersøke hvor feilen kunne ligge.
+
+Oppsummering
+
+Denne uken har jeg fått mer praktisk erfaring med administrasjon av Windows-domener.
+
+Jeg kan nå utføre flere grunnleggende oppgaver innen Active Directory, teste brukertilgang, kontrollere gruppepolicyer og undersøke vanlige nettverks- og DNS-problemer.
+
+Dette er nyttige ferdigheter som jeg kan bruke i framtidig arbeid innen IT-drift og brukerstøtte.
+
+Se lenger ned i dokumentet for en detaljert oversikt over arbeidet jeg har gjort hver dag fra mandag til fredag. Der har jeg dokumentert oppgavene, testene, resultatene og feilsøkingen gjennom hele uken.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 UKEPLAN-AD DS OG LDAP
 
 
