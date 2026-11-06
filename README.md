@@ -35,8 +35,11 @@ Denne uken har jeg fått mer praktisk erfaring med administrasjon av Windows-dom
 Jeg kan nå utføre flere grunnleggende oppgaver innen Active Directory, teste brukertilgang, kontrollere gruppepolicyer og undersøke vanlige nettverks- og DNS-problemer.
 
 Dette er nyttige ferdigheter som jeg kan bruke i framtidig arbeid innen IT-drift og brukerstøtte.
+<img width="1012" height="624" alt="image" src="https://github.com/user-attachments/assets/5433c5eb-1b45-4cf6-94b3-2f96bd70da00" />
+<img width="960" height="564" alt="image" src="https://github.com/user-attachments/assets/8f1ab072-a04d-4a39-98db-3c019f8d3b46" />
 
-Se lenger ned i dokumentet for en detaljert oversikt over arbeidet jeg har gjort hver dag fra mandag til fredag. Der har jeg dokumentert oppgavene, testene, resultatene og feilsøkingen gjennom hele uken.
+
+Se lenger ned i andre dokumentet for en detaljert oversikt over arbeidet jeg har gjort hver dag fra mandag til fredag. Der har jeg dokumentert oppgavene, testene, resultatene og feilsøkingen gjennom hele uken.
 
 
 
@@ -852,6 +855,9 @@ Læreren oppga flere valgfrie utvidelser: Security Filtering, HTML-rapport med g
 9. Oppsummering
 
 Jeg har opprettet og testet en enkel GPO, dokumentert den med gpresult /r og gjennomført en systematisk feilsøkingsprosess. Jeg har også forklart forskjellen mellom OU, gruppe og GPO og hvordan DNS, AD DS, LDAP, grupper, ressurser og policyer henger sammen. DNS-feilen var fortsatt ikke fullstendig løst ved siste kontroll, og dette er oppgitt tydelig i rapporten.
+
+
+
 
 
 
